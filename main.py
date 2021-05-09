@@ -24,6 +24,14 @@ character_height = character_size[1]
 character_x_pos = (screen_width - character_width) / 2
 character_y_pos = screen_height - character_height
 
+# Enemy
+enemy = pygame.image.load("C:\\Users\\user\\source\\repos\\pygame_basic\\enemy.png")
+enemy_size = enemy.get_rect().size  # image size
+enemy_width = enemy_size[0]
+enemy_height = enemy_size[1]
+enemy_x_pos = (screen_width - enemy_width) / 2
+enemy_y_pos = (screen_height - enemy_height) / 2
+
 to_x = to_y = 0
 
 # Event loop
@@ -65,10 +73,25 @@ while running:
         character_y_pos = 0
     elif character_y_pos > screen_height - character_height:
         character_y_pos = screen_height - character_height
+        
+    # Update rect information for checking collision
+    character_rect = character.get_rect()
+    character_rect.left = character_x_pos
+    character_rect.top = character_y_pos
+    
+    enemy_rect = enemy.get_rect()
+    enemy_rect.left = enemy_x_pos
+    enemy_rect.top = enemy_y_pos
+    
+    # Check collision
+    if character_rect.colliderect(enemy_rect):
+        print('Collision')
+        running = False
                   
 
-    screen.blit(background, (0, 0))
-    screen.blit(character,(character_x_pos, character_y_pos))
+    screen.blit(background, (0, 0)) # Draw background
+    screen.blit(character,(character_x_pos, character_y_pos))   # Draw character
+    screen.blit(enemy, (enemy_x_pos, enemy_y_pos))  # Draw enemy
     
     pygame.display.update() # Draw game screen again 
 
