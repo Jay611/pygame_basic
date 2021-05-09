@@ -10,6 +10,9 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 # Screen title
 pygame.display.set_caption("Nado Game")
 
+# FPS
+clock = pygame.time.Clock()
+
 # Load background image
 background = pygame.image.load("C:\\Users\\user\\source\\repos\\pygame_basic\\background.png")
 
@@ -25,8 +28,10 @@ to_x = to_y = 0
 
 # Event loop
 running = True
-character_speed = 1
+character_speed = 0.5
 while running:
+    dt = clock.tick(60) # The number of frames per second
+    
     for event in pygame.event.get():  # Check event
         if event.type == pygame.QUIT: # Close window?
             running = False
@@ -47,8 +52,8 @@ while running:
             elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
                 to_y = 0
 
-    character_x_pos += to_x
-    character_y_pos += to_y  
+    character_x_pos += to_x * dt
+    character_y_pos += to_y * dt
     
     # Horizontal boundary
     if character_x_pos < 0:
