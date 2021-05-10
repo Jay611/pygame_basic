@@ -1,99 +1,149 @@
 import pygame
-
+import random
+import os
+#####################################################################
+# Initialization
 pygame.init()
 
 # Screen size
-screen_width = 480
-screen_height = 640
+screen_width = 640
+screen_height = 480
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 # Screen title
-pygame.display.set_caption("Nado Game")
+pygame.display.set_caption("Pang Pang")
 
 # FPS
 clock = pygame.time.Clock()
+#####################################################################
 
 # Load background image
-background = pygame.image.load("C:\\Users\\user\\source\\repos\\pygame_basic\\background.png")
+current_path = os.path.dirname(__file__)
+image_path = os.path.join(current_path, 'images')
 
-# Load game character
-character = pygame.image.load("C:\\Users\\user\\source\\repos\\pygame_basic\\character.png")
-character_size = character.get_rect().size  # image size
+background = pygame.image.load(os.path.join(image_path, 'background.png'))
+
+# Create stage
+stage = pygame.image.load(os.path.join(image_path, 'stage.png'))
+stage_size = stage.get_rect().size
+stage_height = stage_size[1]
+
+# Create character
+character = pygame.image.load(os.path.join(image_path, 'character.png'))
+character_size = character.get_rect().size
 character_width = character_size[0]
 character_height = character_size[1]
 character_x_pos = (screen_width - character_width) / 2
-character_y_pos = screen_height - character_height
+character_y_pos = screen_height - character_height - stage_height
 
-# Enemy
-enemy = pygame.image.load("C:\\Users\\user\\source\\repos\\pygame_basic\\enemy.png")
-enemy_size = enemy.get_rect().size  # image size
-enemy_width = enemy_size[0]
-enemy_height = enemy_size[1]
-enemy_x_pos = (screen_width - enemy_width) / 2
-enemy_y_pos = (screen_height - enemy_height) / 2
+# Character movement
+character_to_x = 0
 
-to_x = to_y = 0
+# Character speed
+character_speed = 0.5
+
+# Create weapon
+weapon = pygame.image.load(os.path.join(image_path, 'weapon.png'))
+weapon_size = weapon.get_rect().size
+weapon_width = weapon_size[0]
+
+weapons = []
+weapon_speed = 1
+
+# Create balloon
+ball_images = [
+    pygame.image.load(os.path.join(image_path, 'balloon1.png')),
+    pygame.image.load(os.path.join(image_path, 'balloon2.png')),
+    pygame.image.load(os.path.join(image_path, 'balloon3.png')),
+    pygame.image.load(os.path.join(image_path, 'balloon4.png'))
+]
+
+# Ball speed
+ball_speed_y = [-18, -15, -12, -9]
+
+balls = []
+
+balls.append({
+    'pos_x': 50,
+    'pos_y': 50,
+    'img_idx': 0,
+    'to_x': 3,
+    'to_y': -6,
+    'init_spd_y': ball_speed_y[0]
+})
+
+
 
 # Event loop
 running = True
-character_speed = 0.5
 while running:
     dt = clock.tick(60) # The number of frames per second
     
     for event in pygame.event.get():  # Check event
         if event.type == pygame.QUIT: # Close window?
             running = False
-        
-        if event.type == pygame.KEYDOWN:    # Check key event
+            
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                to_x -= character_speed
+                character_to_x -= character_speed
             elif event.key == pygame.K_RIGHT:
-                to_x += character_speed
-            elif event.key == pygame.K_UP:
-                to_y -= character_speed
-            elif event.key == pygame.K_DOWN:
-                to_y += character_speed
-                
+                character_to_x += character_speed
+            elif event.key == pygame.K_SPACE:
+                weapon_x_pos = character_x_pos + character_width / 2 - weapon_width / 2
+                weapon_y_pos = character_y_pos
+                weapons.append([weapon_x_pos, weapon_y_pos])
+        
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                to_x = 0
-            elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                to_y = 0
-
-    character_x_pos += to_x * dt
-    character_y_pos += to_y * dt
+            if event.key in (pygame.K_LEFT, pygame.K_RIGHT):
+                character_to_x = 0
+                
+    # Character location
+    character_x_pos += character_to_x * dt
     
-    # Horizontal boundary
     if character_x_pos < 0:
         character_x_pos = 0
     elif character_x_pos > screen_width - character_width:
         character_x_pos = screen_width - character_width
-    # Vertical boundary
-    if character_y_pos < 0:
-        character_y_pos = 0
-    elif character_y_pos > screen_height - character_height:
-        character_y_pos = screen_height - character_height
         
-    # Update rect information for checking collision
-    character_rect = character.get_rect()
-    character_rect.left = character_x_pos
-    character_rect.top = character_y_pos
-    
-    enemy_rect = enemy.get_rect()
-    enemy_rect.left = enemy_x_pos
-    enemy_rect.top = enemy_y_pos
-    
-    # Check collision
-    if character_rect.colliderect(enemy_rect):
-        print('Collision')
-        running = False
-                  
+    # Weapon location
+    weapons = [[w[0], w[1] - weapon_speed * dt] for w in weapons if w[1] - weapon_speed * dt > 0]
+  
+    # Ball location
+    for ball_idx, ball_val in enumerate(balls):
+        ball_x_pos = ball_val['pos_x']          
+        ball_y_pos = ball_val['pos_y']
+        ball_img_idx = ball_val['img_idx']
+        
+        ball_size = ball_images[ball_img_idx].get_rect().size
+        ball_width, ball_height = ball_size[0], ball_size[1]
+        
+        if ball_x_pos < 0 or ball_x_pos > screen_width - ball_width:
+            ball_val['to_x'] *= -1
+        
+        if ball_y_pos >= screen_height - stage_height - ball_height:
+            ball_val['to_y'] = ball_val['init_spd_y']
+        else:
+            ball_val['to_y'] += 0.5
+            
+        ball_val['pos_x'] += ball_val['to_x']
+        ball_val['pos_y'] += ball_val['to_y']
 
     screen.blit(background, (0, 0)) # Draw background
-    screen.blit(character,(character_x_pos, character_y_pos))   # Draw character
-    screen.blit(enemy, (enemy_x_pos, enemy_y_pos))  # Draw enemy
     
+    for weapon_x_pos, weapon_y_pos in weapons:
+        screen.blit(weapon, (weapon_x_pos, weapon_y_pos))
+        
+    for idx, ball in enumerate(balls):
+        ball_x_pos = ball['pos_x']
+        ball_y_pos = ball['pos_y']
+        ball_img_idx = ball['img_idx']
+        screen.blit(ball_images[ball_img_idx], (ball_x_pos, ball_y_pos))
+    
+    screen.blit(stage, (0, screen_height - stage_height))
+    screen.blit(character, (character_x_pos, character_y_pos))
+
     pygame.display.update() # Draw game screen again 
+
 
 # Quit pygame
 pygame.quit()
