@@ -48,7 +48,7 @@ weapon_size = weapon.get_rect().size
 weapon_width = weapon_size[0]
 
 weapons = []
-weapon_speed = 0.5
+weapon_speed = 0.3
 
 # Create balloon
 ball_images = [
@@ -68,7 +68,7 @@ balls.append({
     'pos_y': 50,
     'img_idx': 0,
     'to_x': 3,
-    'to_y': -6,
+    'to_y': -1,
     'init_spd_y': ball_speed_y[0]
 })
 
@@ -180,7 +180,7 @@ while running:
                         'pos_y': ball_y_pos + ball_height / 2 - small_ball_height / 2,
                         'img_idx': ball_img_idx + 1,
                         'to_x': -3,
-                        'to_y': -6,
+                        'to_y': -2,
                         'init_spd_y': ball_speed_y[ball_img_idx + 1]
                     })
                     balls.append({
@@ -188,7 +188,7 @@ while running:
                         'pos_y': ball_y_pos + ball_height / 2 - small_ball_height / 2,
                         'img_idx': ball_img_idx + 1,
                         'to_x': 3,
-                        'to_y': -6,
+                        'to_y': -2,
                         'init_spd_y': ball_speed_y[ball_img_idx + 1]
                     })
                 
